@@ -84,6 +84,7 @@ type GithubIssue = {
 const getIssues = async (username: string, repo: string) => {
   const result = await fetch(`https://api.github.com/repos/${username}/${repo}/issues`);
   const issues = await result.json() as RestResponse;
+  if (!issues) return [];
   return issues
     .filter(issue => issue.state === 'open')
     .map(issue => ({
