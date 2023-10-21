@@ -81,6 +81,13 @@ type GithubIssue = {
   }
 };
 
+const NotFound = () => new Response("404 Not Found", {
+  status: 404,
+  headers: {
+    "content-type": "text/html",
+  },
+});
+
 const getIssues = async (username: string, repo: string) => {
   const result = await fetch(`https://api.github.com/repos/${username}/${repo}/issues`);
   const issues = await result.json() as RestResponse;
@@ -119,6 +126,7 @@ const Issues: React.FC<{ issues: GithubIssue[] }> = ({ issues }) => issues.map((
 const App: React.FC<{ issues: GithubIssue[] }> = ({ issues }) => {
   return <html lang="en">
     <head>
+      <meta charSet="utf-8" />
       <title>Github issues overlay</title>
       <style>
         {`
@@ -145,13 +153,7 @@ Bun.serve({
   async fetch(request) {
     const pathname = new URL(request.url).pathname;
     const [, username, repo] = pathname.split("/");
-    if (!username || !repo)
-      return new Response("404 Not Found", {
-        status: 404,
-        headers: {
-          "content-type": "text/html",
-        },
-      });
+    if (!username || !repo) return NotFound();
 
     const issues = await getIssues(username, repo);
     return new Response('<!doctype html>' + renderToStaticMarkup(<App issues={issues} />), {
